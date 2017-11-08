@@ -25,18 +25,25 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-function Initialize() { }
+// function Initialize() {}
 
 function Process(request) {
   if (options.verbose) {
-    log("Processing " + request.host + request.path +
-        " from " + request.referrer + "@" + request.userAgent);
+    log(
+      'Processing ' +
+        request.host +
+        request.path +
+        ' from ' +
+        request.referrer +
+        '@' +
+        request.userAgent
+    );
   }
   if (!output[request.host]) {
     output[request.host] = 1;
   } else {
-    output[request.host]++
+    output[request.host]++;
   }
 }
 
-Initialize();
+// Initialize();

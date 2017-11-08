@@ -70,20 +70,19 @@ using v8::Value;
  */
 class HttpRequest {
  public:
-  virtual ~HttpRequest() { }
+  virtual ~HttpRequest() {}
   virtual const string& Path() = 0;
   virtual const string& Referrer() = 0;
   virtual const string& Host() = 0;
   virtual const string& UserAgent() = 0;
 };
 
-
 /**
  * The abstract superclass of http request processors.
  */
 class HttpRequestProcessor {
  public:
-  virtual ~HttpRequestProcessor() { }
+  virtual ~HttpRequestProcessor() {}
 
   // Initialize this processor.  The map contains options that control
   // how requests should be processed.
@@ -95,7 +94,6 @@ class HttpRequestProcessor {
 
   static void Log(const char* event);
 };
-
 
 /**
  * An http request processor that is scriptable using JavaScript.
@@ -158,11 +156,9 @@ class JsHttpRequestProcessor : public HttpRequestProcessor {
   static Global<ObjectTemplate> map_template_;
 };
 
-
 // -------------------------
 // --- P r o c e s s o r ---
 // -------------------------
-
 
 static void LogCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
   if (args.Length() < 1) return;
@@ -172,7 +168,6 @@ static void LogCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
   String::Utf8Value value(isolate, arg);
   HttpRequestProcessor::Log(*value);
 }
-
 
 // Execute the script and fetch the Process method.
 bool JsHttpRequestProcessor::Initialize(map<string, string>* opts,
@@ -200,12 +195,10 @@ bool JsHttpRequestProcessor::Initialize(map<string, string>* opts,
   Context::Scope context_scope(context);
 
   // Make the options mapping available within the context
-  if (!InstallMaps(opts, output))
-    return false;
+  if (!InstallMaps(opts, output)) return false;
 
   // Compile and run the script
-  if (!ExecuteScript(script_))
-    return false;
+  if (!ExecuteScript(script_)) return false;
 
   // The script compiled and ran correctly.  Now we fetch out the
   // Process function from the global object.
@@ -231,7 +224,6 @@ bool JsHttpRequestProcessor::Initialize(map<string, string>* opts,
   return true;
 }
 
-
 bool JsHttpRequestProcessor::ExecuteScript(Local<String> script) {
   HandleScope handle_scope(GetIsolate());
 
@@ -243,6 +235,7 @@ bool JsHttpRequestProcessor::ExecuteScript(Local<String> script) {
 
   // Compile the script and check for errors.
   Local<Script> compiled_script;
+
   if (!Script::Compile(context, script).ToLocal(&compiled_script)) {
     String::Utf8Value error(GetIsolate(), try_catch.Exception());
     Log(*error);
@@ -262,7 +255,6 @@ bool JsHttpRequestProcessor::ExecuteScript(Local<String> script) {
 
   return true;
 }
-
 
 bool JsHttpRequestProcessor::InstallMaps(map<string, string>* opts,
                                          map<string, string>* output) {
@@ -292,7 +284,6 @@ bool JsHttpRequestProcessor::InstallMaps(map<string, string>* opts,
 
   return true;
 }
-
 
 bool JsHttpRequestProcessor::Process(HttpRequest* request) {
   // Create a handle scope to keep the temporary object references.
@@ -326,7 +317,6 @@ bool JsHttpRequestProcessor::Process(HttpRequest* request) {
   return true;
 }
 
-
 JsHttpRequestProcessor::~JsHttpRequestProcessor() {
   // Dispose the persistent handles.  When no one else has any
   // references to the objects stored in the handles they will be
@@ -335,10 +325,8 @@ JsHttpRequestProcessor::~JsHttpRequestProcessor() {
   process_.Reset();
 }
 
-
 Global<ObjectTemplate> JsHttpRequestProcessor::request_template_;
 Global<ObjectTemplate> JsHttpRequestProcessor::map_template_;
-
 
 // -----------------------------------
 // --- A c c e s s i n g   M a p s ---
@@ -377,7 +365,6 @@ Local<Object> JsHttpRequestProcessor::WrapMap(map<string, string>* obj) {
   return handle_scope.Escape(result);
 }
 
-
 // Utility function that extracts the C++ map pointer from a wrapper
 // object.
 map<string, string>* JsHttpRequestProcessor::UnwrapMap(Local<Object> obj) {
@@ -386,14 +373,12 @@ map<string, string>* JsHttpRequestProcessor::UnwrapMap(Local<Object> obj) {
   return static_cast<map<string, string>*>(ptr);
 }
 
-
 // Convert a JavaScript string to a std::string.  To not bother too
 // much with string encodings we just use ascii.
 string ObjectToString(v8::Isolate* isolate, Local<Value> value) {
   String::Utf8Value utf8_value(isolate, value);
   return string(*utf8_value);
 }
-
 
 void JsHttpRequestProcessor::MapGet(Local<Name> name,
                                     const PropertyCallbackInfo<Value>& info) {
@@ -416,9 +401,9 @@ void JsHttpRequestProcessor::MapGet(Local<Name> name,
   info.GetReturnValue().Set(
       String::NewFromUtf8(info.GetIsolate(), value.c_str(),
                           NewStringType::kNormal,
-                          static_cast<int>(value.length())).ToLocalChecked());
+                          static_cast<int>(value.length()))
+          .ToLocalChecked());
 }
-
 
 void JsHttpRequestProcessor::MapSet(Local<Name> name, Local<Value> value_obj,
                                     const PropertyCallbackInfo<Value>& info) {
@@ -438,7 +423,6 @@ void JsHttpRequestProcessor::MapSet(Local<Name> name, Local<Value> value_obj,
   info.GetReturnValue().Set(value_obj);
 }
 
-
 Local<ObjectTemplate> JsHttpRequestProcessor::MakeMapTemplate(
     Isolate* isolate) {
   EscapableHandleScope handle_scope(isolate);
@@ -450,7 +434,6 @@ Local<ObjectTemplate> JsHttpRequestProcessor::MakeMapTemplate(
   // Again, return the result through the current handle scope.
   return handle_scope.Escape(result);
 }
-
 
 // -------------------------------------------
 // --- A c c e s s i n g   R e q u e s t s ---
@@ -491,7 +474,6 @@ Local<Object> JsHttpRequestProcessor::WrapRequest(HttpRequest* request) {
   return handle_scope.Escape(result);
 }
 
-
 /**
  * Utility function that extracts the C++ http request object from a
  * wrapper object.
@@ -502,7 +484,6 @@ HttpRequest* JsHttpRequestProcessor::UnwrapRequest(Local<Object> obj) {
   return static_cast<HttpRequest*>(ptr);
 }
 
-
 void JsHttpRequestProcessor::GetPath(Local<String> name,
                                      const PropertyCallbackInfo<Value>& info) {
   // Extract the C++ request object from the JavaScript wrapper.
@@ -512,47 +493,41 @@ void JsHttpRequestProcessor::GetPath(Local<String> name,
   const string& path = request->Path();
 
   // Wrap the result in a JavaScript string and return it.
-  info.GetReturnValue().Set(
-      String::NewFromUtf8(info.GetIsolate(), path.c_str(),
-                          NewStringType::kNormal,
-                          static_cast<int>(path.length())).ToLocalChecked());
+  info.GetReturnValue().Set(String::NewFromUtf8(info.GetIsolate(), path.c_str(),
+                                                NewStringType::kNormal,
+                                                static_cast<int>(path.length()))
+                                .ToLocalChecked());
 }
-
 
 void JsHttpRequestProcessor::GetReferrer(
-    Local<String> name,
-    const PropertyCallbackInfo<Value>& info) {
+    Local<String> name, const PropertyCallbackInfo<Value>& info) {
   HttpRequest* request = UnwrapRequest(info.Holder());
   const string& path = request->Referrer();
-  info.GetReturnValue().Set(
-      String::NewFromUtf8(info.GetIsolate(), path.c_str(),
-                          NewStringType::kNormal,
-                          static_cast<int>(path.length())).ToLocalChecked());
+  info.GetReturnValue().Set(String::NewFromUtf8(info.GetIsolate(), path.c_str(),
+                                                NewStringType::kNormal,
+                                                static_cast<int>(path.length()))
+                                .ToLocalChecked());
 }
-
 
 void JsHttpRequestProcessor::GetHost(Local<String> name,
                                      const PropertyCallbackInfo<Value>& info) {
   HttpRequest* request = UnwrapRequest(info.Holder());
   const string& path = request->Host();
-  info.GetReturnValue().Set(
-      String::NewFromUtf8(info.GetIsolate(), path.c_str(),
-                          NewStringType::kNormal,
-                          static_cast<int>(path.length())).ToLocalChecked());
+  info.GetReturnValue().Set(String::NewFromUtf8(info.GetIsolate(), path.c_str(),
+                                                NewStringType::kNormal,
+                                                static_cast<int>(path.length()))
+                                .ToLocalChecked());
 }
-
 
 void JsHttpRequestProcessor::GetUserAgent(
-    Local<String> name,
-    const PropertyCallbackInfo<Value>& info) {
+    Local<String> name, const PropertyCallbackInfo<Value>& info) {
   HttpRequest* request = UnwrapRequest(info.Holder());
   const string& path = request->UserAgent();
-  info.GetReturnValue().Set(
-      String::NewFromUtf8(info.GetIsolate(), path.c_str(),
-                          NewStringType::kNormal,
-                          static_cast<int>(path.length())).ToLocalChecked());
+  info.GetReturnValue().Set(String::NewFromUtf8(info.GetIsolate(), path.c_str(),
+                                                NewStringType::kNormal,
+                                                static_cast<int>(path.length()))
+                                .ToLocalChecked());
 }
-
 
 Local<ObjectTemplate> JsHttpRequestProcessor::MakeRequestTemplate(
     Isolate* isolate) {
@@ -583,28 +558,24 @@ Local<ObjectTemplate> JsHttpRequestProcessor::MakeRequestTemplate(
   return handle_scope.Escape(result);
 }
 
-
 // --- Test ---
-
 
 void HttpRequestProcessor::Log(const char* event) {
   printf("Logged: %s\n", event);
 }
-
 
 /**
  * A simplified http request.
  */
 class StringHttpRequest : public HttpRequest {
  public:
-  StringHttpRequest(const string& path,
-                    const string& referrer,
-                    const string& host,
-                    const string& user_agent);
+  StringHttpRequest(const string& path, const string& referrer,
+                    const string& host, const string& user_agent);
   virtual const string& Path() { return path_; }
   virtual const string& Referrer() { return referrer_; }
   virtual const string& Host() { return host_; }
   virtual const string& UserAgent() { return user_agent_; }
+
  private:
   string path_;
   string referrer_;
@@ -612,20 +583,12 @@ class StringHttpRequest : public HttpRequest {
   string user_agent_;
 };
 
-
-StringHttpRequest::StringHttpRequest(const string& path,
-                                     const string& referrer,
+StringHttpRequest::StringHttpRequest(const string& path, const string& referrer,
                                      const string& host,
                                      const string& user_agent)
-    : path_(path),
-      referrer_(referrer),
-      host_(host),
-      user_agent_(user_agent) { }
+    : path_(path), referrer_(referrer), host_(host), user_agent_(user_agent) {}
 
-
-void ParseOptions(int argc,
-                  char* argv[],
-                  map<string, string>* options,
+void ParseOptions(int argc, char* argv[], map<string, string>* options,
                   string* file) {
   for (int i = 1; i < argc; i++) {
     string arg = argv[i];
@@ -634,12 +597,11 @@ void ParseOptions(int argc,
       *file = arg;
     } else {
       string key = arg.substr(0, index);
-      string value = arg.substr(index+1);
+      string value = arg.substr(index + 1);
       (*options)[key] = value;
     }
   }
 }
-
 
 // Reads a file into a v8 string.
 MaybeLocal<String> ReadFile(Isolate* isolate, const string& name) {
@@ -666,17 +628,14 @@ MaybeLocal<String> ReadFile(Isolate* isolate, const string& name) {
   return result;
 }
 
-
 const int kSampleSize = 6;
 StringHttpRequest kSampleRequests[kSampleSize] = {
-  StringHttpRequest("/process.cc", "localhost", "google.com", "firefox"),
-  StringHttpRequest("/", "localhost", "google.net", "firefox"),
-  StringHttpRequest("/", "localhost", "google.org", "safari"),
-  StringHttpRequest("/", "localhost", "yahoo.com", "ie"),
-  StringHttpRequest("/", "localhost", "yahoo.com", "safari"),
-  StringHttpRequest("/", "localhost", "yahoo.com", "firefox")
-};
-
+    StringHttpRequest("/process.cc", "localhost", "google.com", "firefox"),
+    StringHttpRequest("/", "localhost", "google.net", "firefox"),
+    StringHttpRequest("/", "localhost", "google.org", "safari"),
+    StringHttpRequest("/", "localhost", "yahoo.com", "ie"),
+    StringHttpRequest("/", "localhost", "yahoo.com", "safari"),
+    StringHttpRequest("/", "localhost", "yahoo.com", "firefox")};
 
 bool ProcessEntries(v8::Platform* platform, HttpRequestProcessor* processor,
                     int count, StringHttpRequest* reqs) {
@@ -689,14 +648,12 @@ bool ProcessEntries(v8::Platform* platform, HttpRequestProcessor* processor,
   return true;
 }
 
-
 void PrintMap(map<string, string>* m) {
   for (map<string, string>::iterator i = m->begin(); i != m->end(); i++) {
     pair<string, string> entry = *i;
     printf("%s: %s\n", entry.first.c_str(), entry.second.c_str());
   }
 }
-
 
 int main(int argc, char* argv[]) {
   v8::V8::InitializeICUDefaultLocation(argv[0]);
